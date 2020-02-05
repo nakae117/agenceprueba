@@ -8,11 +8,11 @@
 			</thead>
 			<tbody>
 				<tr>
-					<td>Período</td>
-					<td>Receita Líquida</td>
-					<td>Custo Fixo</td>
-					<td>Comissão</td>
-					<td>Lucro</td>
+					<th scope="col">Período</th>
+					<th scope="col">Receita Líquida</th>
+					<th scope="col">Custo Fixo</th>
+					<th scope="col">Comissão</th>
+					<th scope="col">Lucro</th>
 				</tr>
 				<tr v-for="(mes, key) in relatorio.meses" :key="key">
 					<td>@{{mes.fecha}}</td>
@@ -22,7 +22,7 @@
 					<td>-R$ @{{mes.lucro}}</td>
 				</tr>
 				<tr>
-					<td>Saldo</td>
+					<th scope="col">Saldo</th>
 					<td>R$ @{{relatorio.totales.receita_liquida}}</td>
 					<td>-R$ @{{relatorio.totales.custo_fixo}}</td>
 					<td>-R$ @{{relatorio.totales.comissao}}</td>
