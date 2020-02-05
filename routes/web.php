@@ -14,3 +14,4 @@
 Route::get('/', 'HomeController@index');
 Route::get('/relatorio', 'HomeController@relatorio');
 Route::get('/bar', 'HomeController@bar');
+Route::get('/pie', 'HomeController@pie');

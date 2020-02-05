@@ -42,7 +42,8 @@ const app = new Vue({
 			mesHasta: '12',
 			yearHasta: '2007',
 			relatorios: [],
-			barData: {}
+			barData: {},
+			pieData: {}
 		}
 	},
 	methods: {
@@ -65,12 +66,12 @@ const app = new Vue({
 
 						axios.get('/relatorio', data)
 							 .then((res) => {
-							 	this.relatorios = res.data
-							 	this.cargando = false
+								this.relatorios = res.data
+								this.cargando = false
 							 })
 							 .catch((error) => {
-							 	console.log(error)
-							 	this.cargando = false
+								console.log(error)
+								this.cargando = false
 							 })
 					} else {
 						alert('Por favor seleccione un rango de fecha correcto.')
@@ -101,13 +102,13 @@ const app = new Vue({
 
 						axios.get('/bar', data)
 							 .then((res) => {
-							 	let ctx = this.$refs.chartBar.getContext('2d')
-							 	this.barData = res.data
-							 	this.cargando = false
+								let ctx = this.$refs.chartBar.getContext('2d')
+								this.barData = res.data
+								this.cargando = false
 
-							 	if(typeof window.myBar !== 'undefined'){
-							 		window.myBar.destroy()
-							 	}
+								if(typeof window.myBar !== 'undefined'){
+									window.myBar.destroy()
+								}
 								window.myBar = new Chart(ctx, {
 									type: 'bar',
 									data: this.barData,
@@ -144,8 +145,61 @@ const app = new Vue({
 								});
 							 })
 							 .catch((error) => {
-							 	console.log(error)
-							 	this.cargando = false
+								console.log(error)
+								this.cargando = false
+							 })
+					} else {
+						alert('Por favor seleccione un rango de fecha correcto.')
+					}
+				} else {
+					alert('Por favor seleccione un rango de fecha correcto.')
+				}
+			} else{
+				alert('Seleccione al menos un consultor')
+			}
+		},
+		getDataPie(){
+			if($('[name="usuarios[]"]').val().length){
+				if(parseInt(this.yearDesde) <= parseInt(this.yearHasta)){
+					if(parseInt(this.mesDesde) <= parseInt(this.mesHasta)){
+						this.consulta = 'pie'
+						this.cargando = true
+
+						let data = {
+							params: {
+								mesDesde: this.mesDesde,
+								yearDesde: this.yearDesde,
+								mesHasta: this.mesHasta,
+								yearHasta: this.yearHasta,
+								usuarios: $('[name="usuarios[]"]').val()
+							}
+						}
+
+						axios.get('/pie', data)
+							 .then((res) => {
+								let ctx = this.$refs.chartPie.getContext('2d')
+								this.pieData = res.data
+								this.cargando = false
+								this.pieData.options = {
+									tooltips: {
+										responsive: true,
+										callbacks: {
+											label: function(tooltipItem, data) {
+												console.log(data)
+												return data.labels[tooltipItem.index] + ': ' + data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index] + '%'
+											}
+										}
+									}
+								}
+								
+								if(typeof window.myPie !== 'undefined'){
+									window.myPie.destroy()
+								}
+								window.myPie = new Chart(ctx, this.pieData)
+							 })
+							 .catch((error) => {
+								console.log(error)
+								this.cargando = false
 							 })
 					} else {
 						alert('Por favor seleccione un rango de fecha correcto.')

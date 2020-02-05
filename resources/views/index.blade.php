@@ -27,7 +27,7 @@
 			<div class="col-lg-2 col-md-2 col-sm-2">
 				<button class="btn btn-primary btn-block btn-sm" @click="getRelatorio()">Relatório</button><br>
 				<button class="btn btn-secondary btn-block btn-sm" @click="getDataBar()">Gráfico</button><br>
-				<button class="btn btn-danger btn-block btn-sm">Pizza</button><br>
+				<button class="btn btn-danger btn-block btn-sm" @click="getDataPie()">Pizza</button><br>
 			</div>
 			<div class="col-lg-12 col-md-12 col-sm-12" v-if="cargando == true">
 				<div class="alert alert-primary" role="alert">
@@ -36,16 +36,9 @@
 			</div>
 			@include('relatorio')
 			@include('bar')
+			@include('pie')
 		</div>
 	</div>
-
-	{{-- <div class="canvas-holder">
-		<canvas id="chart-area"></canvas>
-	</div>
-
-	<div class="canvas-holder">
-		<canvas id="chart-vertical"></canvas>
-	</div> --}}
 </div>
 
 @endsection

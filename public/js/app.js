@@ -49231,7 +49231,8 @@ var app = new Vue({
       mesHasta: '12',
       yearHasta: '2007',
       relatorios: [],
-      barData: {}
+      barData: {},
+      pieData: {}
     };
   },
   methods: {
@@ -49333,6 +49334,59 @@ var app = new Vue({
             })["catch"](function (error) {
               console.log(error);
               _this2.cargando = false;
+            });
+          } else {
+            alert('Por favor seleccione un rango de fecha correcto.');
+          }
+        } else {
+          alert('Por favor seleccione un rango de fecha correcto.');
+        }
+      } else {
+        alert('Seleccione al menos un consultor');
+      }
+    },
+    getDataPie: function getDataPie() {
+      var _this3 = this;
+
+      if ($('[name="usuarios[]"]').val().length) {
+        if (parseInt(this.yearDesde) <= parseInt(this.yearHasta)) {
+          if (parseInt(this.mesDesde) <= parseInt(this.mesHasta)) {
+            this.consulta = 'pie';
+            this.cargando = true;
+            var data = {
+              params: {
+                mesDesde: this.mesDesde,
+                yearDesde: this.yearDesde,
+                mesHasta: this.mesHasta,
+                yearHasta: this.yearHasta,
+                usuarios: $('[name="usuarios[]"]').val()
+              }
+            };
+            axios.get('/pie', data).then(function (res) {
+              var ctx = _this3.$refs.chartPie.getContext('2d');
+
+              _this3.pieData = res.data;
+              _this3.cargando = false;
+              _this3.pieData.options = {
+                tooltips: {
+                  responsive: true,
+                  callbacks: {
+                    label: function label(tooltipItem, data) {
+                      console.log(data);
+                      return data.labels[tooltipItem.index] + ': ' + data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index] + '%';
+                    }
+                  }
+                }
+              };
+
+              if (typeof window.myPie !== 'undefined') {
+                window.myPie.destroy();
+              }
+
+              window.myPie = new Chart(ctx, _this3.pieData);
+            })["catch"](function (error) {
+              console.log(error);
+              _this3.cargando = false;
             });
           } else {
             alert('Por favor seleccione un rango de fecha correcto.');

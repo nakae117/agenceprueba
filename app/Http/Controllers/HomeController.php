@@ -116,10 +116,13 @@ class HomeController extends Controller {
 			for($i = 0; $i <= $difmes ; $i++){
 				$pivote->add(new \DateInterval('P1M'));
 				// echo $this->meses[((int) $pivote->format('m') - 1)].'<br>';
+				$mesActual = (int) $pivote->format('m');
 				$mesResultado = $usuario->getResultadoMes($pivote->format('Y-m'));
 				if($mesResultado){
-					$barChartData['databar']['datasets'][$iterator]['data'][] = $mesResultado[1]['receita_liquida'];
+					$barChartData['databar']['datasets'][$iterator]['data'][$mesActual - 1] = $mesResultado[1]['receita_liquida'];
 					$custoFixoTotal += $mesResultado[1]['custo_fixo'];
+				} else {
+					$barChartData['databar']['datasets'][$iterator]['data'][$mesActual - 1] = 0;
 				}
 			}
 			$iterator++;
@@ -127,6 +130,48 @@ class HomeController extends Controller {
 		$custoFixoMedia = $custoFixoTotal/count(request()->usuarios);
 		for($i = 0; $i < $ite; $i++){ 
 			$barChartData['databar']['datasets'][0]['data'][$i] = $custoFixoMedia;
+		}
+
+		return response()->json($barChartData['databar']);
+	}
+
+	public function pie(Model_cao_usuario $modelUsuarios){
+		$usuarios = $modelUsuarios->join('permissao_sistema', 'cao_usuario.co_usuario', '=', 'permissao_sistema.co_usuario')
+						->where('permissao_sistema.co_sistema', 1)
+						->where('permissao_sistema.in_ativo', 'S')
+						->whereIn('permissao_sistema.co_tipo_usuario', [0, 1, 2])
+						->whereIn('cao_usuario.co_usuario', request()->usuarios)
+						->get();
+
+		$barChartData['databar']['type'] = 'pie';
+		$barChartData['databar']['data']['datasets'] = [];
+		$totalReceitaLiquida = 0;
+
+		foreach($usuarios as $usuario){
+			$barChartData['databar']['data']['labels'][] = $usuario->no_usuario;
+			$desde = new \DateTime(request()->yearDesde.'-'.request()->mesDesde);
+			$hasta = new \DateTime(request()->yearHasta.'-'.request()->mesHasta);
+
+			$d = $desde->diff($hasta);
+			$difmes = $d->format('%m');
+			$pivote = $desde;
+			$pivote->sub(new \DateInterval('P1M'));
+			
+			$receitaLiquida = 0;
+			for($i = 0; $i <= $difmes ; $i++){ 
+				$pivote->add(new \DateInterval('P1M'));
+				$mesResultado = $usuario->getResultadoMes($pivote->format('Y-m'));
+				if($mesResultado){
+					$receitaLiquida += $mesResultado[1]['receita_liquida'];
+				}
+			}
+			$totalReceitaLiquida += $receitaLiquida;
+			$barChartData['databar']['data']['datasets'][0]['data'][] = $receitaLiquida;
+			$barChartData['databar']['data']['datasets'][0]['backgroundColor'][] = $this->generateColor();
+		}
+		$barChartData['databar']['data']['datasets'][0]['label'] = 'Participacao';
+		for ($i = 0; $i < count($barChartData['databar']['data']['datasets'][0]['data']); $i++) { 
+			$barChartData['databar']['data']['datasets'][0]['data'][$i] = (float) number_format(($barChartData['databar']['data']['datasets'][0]['data'][$i] * 100) / $totalReceitaLiquida, 2);
 		}
 
 		return response()->json($barChartData['databar']);
